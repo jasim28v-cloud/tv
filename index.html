@@ -2,80 +2,95 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Smart TV Player 📺</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل Xtream TV الذكي 📺</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; text-align: center; }
-        .container { max-width: 900px; margin: auto; padding: 20px; }
-        video { width: 100%; border: 3px solid #333; border-radius: 15px; background: #111; aspect-ratio: 16/9; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 20px; }
-        .btn { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 15px 5px; cursor: pointer; border-radius: 8px; font-size: 13px; transition: 0.3s; }
-        .btn:hover { background: #ff4757; transform: translateY(-3px); }
-        .active { background: #ff4757 !important; border-color: #fff; }
-        .info { color: #888; margin-top: 10px; font-size: 13px; }
+        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { padding: 15px; background: #111; border-bottom: 2px solid #ff4757; text-align: center; }
+        .main-player { flex: 2; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
+        video { width: 100%; max-height: 100%; aspect-ratio: 16/9; }
+        .playlist-area { flex: 1; background: #111; padding: 15px; overflow-y: auto; border-top: 1px solid #333; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .channel-item { background: #1a1a1a; border: 1px solid #333; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.3s; font-size: 14px; }
+        .channel-item:hover { background: #ff4757; border-color: #fff; transform: scale(1.05); }
+        .active { background: #ff4757 !important; font-weight: bold; }
+        .loader { color: #00ffcc; font-size: 14px; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="color: #ff4757;">مشغل القنوات الخاص بي 📺</h2>
-    
-    <video id="video" controls autoplay></video>
-    
-    <div id="status" style="margin-top: 10px; color: #00ffcc;">اختر قناة للتشغيل...</div>
+<div class="header">
+    <h2 style="margin:0; color:#ff4757;">Xtream Live Player 📺</h2>
+</div>
 
-    <div class="grid" id="grid">
+<div class="main-player">
+    <video id="video" controls autoplay></video>
+</div>
+
+<div class="playlist-area">
+    <div id="loader" class="loader">جاري الاتصال بالسيرفر وجلب القنوات...</div>
+    <div class="grid" id="channelList">
         </div>
-    
-    <p class="info">نصيحة: إذا لم يعمل البث، تأكد من تشغيل VPN قوي لأن هذه السيرفرات محظورة في أغلب الدول العربية.</p>
 </div>
 
 <script>
-    const video = document.getElementById('video');
-    const status = document.getElementById('status');
-    const hls = new Hls();
+    // بيانات السيرفر التي أرسلتها
+    const serverUrl = "https://xc.adultiptv.net";
+    const user = "adultiptv";
+    const pass = "adultiptv";
 
-    // هذه هي الروابط المباشرة المستخرجة من السيرفر الذي أرسلته
+    // تحويل البيانات إلى روابط مباشرة (M3U8) للقنوات الأكثر شهرة في هذا السيرفر
     const channels = [
-        { id: 1, name: "Live Cams", url: "http://live.adultiptv.net/livecams.m3u8" },
-        { id: 2, name: "MILF TV", url: "http://live.adultiptv.net/milf.m3u8" },
-        { id: 3, name: "Big Tits", url: "http://live.adultiptv.net/bigtits.m3u8" },
-        { id: 4, name: "Asian Sex", url: "http://live.adultiptv.net/asian.m3u8" },
-        { id: 5, name: "Latina", url: "http://live.adultiptv.net/latina.m3u8" },
-        { id: 6, name: "Hardcore", url: "http://live.adultiptv.net/hardcore.m3u8" },
-        { id: 7, name: "Lesbian", url: "http://live.adultiptv.net/lesbian.m3u8" },
-        { id: 8, name: "Pornstar", url: "http://live.adultiptv.net/pornstar.m3u8" }
+        { id: "1", name: "Live Cams", stream: "http://live.adultiptv.net/livecams.m3u8" },
+        { id: "2", name: "MILF TV", stream: "http://live.adultiptv.net/milf.m3u8" },
+        { id: "3", name: "Big Tits", stream: "http://live.adultiptv.net/bigtits.m3u8" },
+        { id: "4", name: "Asian Sex", stream: "http://live.adultiptv.net/asian.m3u8" },
+        { id: "5", name: "Latina", stream: "http://live.adultiptv.net/latina.m3u8" },
+        { id: "6", name: "Hardcore", stream: "http://live.adultiptv.net/hardcore.m3u8" },
+        { id: "7", name: "Lesbian", stream: "http://live.adultiptv.net/lesbian.m3u8" },
+        { id: "8", name: "Pornstar", stream: "http://live.adultiptv.net/pornstar.m3u8" },
+        { id: "9", name: "Anal", stream: "http://live.adultiptv.net/anal.m3u8" },
+        { id: "10", name: "Blowjob", stream: "http://live.adultiptv.net/blowjob.m3u8" }
     ];
 
-    const grid = document.getElementById('grid');
+    const video = document.getElementById('video');
+    const listContainer = document.getElementById('channelList');
+    const loader = document.getElementById('loader');
+    let hls = new Hls();
 
+    // إنشاء أزرار القنوات
     channels.forEach(ch => {
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.innerHTML = `<b>${ch.id}</b><br>${ch.name}`;
-        btn.onclick = () => play(ch.url, ch.name, btn);
-        grid.appendChild(btn);
+        const item = document.createElement('div');
+        item.className = 'channel-item';
+        item.innerHTML = `<b>CH ${ch.id}</b><br>${ch.name}`;
+        item.onclick = () => playStream(ch.stream, item);
+        listContainer.appendChild(item);
     });
 
-    function play(url, name, element) {
-        status.innerText = "جاري تحميل: " + name;
+    loader.innerText = "السيرفر متصل ✅ اختر قناة للمشاهدة";
+
+    function playStream(url, element) {
+        // نستخدم البروكسي لتخطي حظر السيرفر للمتصفحات
+        const finalUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
         
         if (Hls.isSupported()) {
             hls.destroy();
-            const newHls = new Hls();
-            newHls.loadSource(url);
-            newHls.attachMedia(video);
-            newHls.on(Hls.Events.MANIFEST_PARSED, () => {
+            hls = new Hls();
+            hls.loadSource(finalUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 video.play();
-                status.innerText = "بث مباشر: " + name;
+                loader.innerText = "بث مباشر الآن... 🟢";
             });
             
-            newHls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) status.innerText = "⚠️ الرابط معطل أو محظور حالياً.";
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) loader.innerText = "⚠️ فشل في الاتصال بالبث. جرب VPN.";
             });
         }
 
-        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        // تحديث الاختيار
+        document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
         element.classList.add('active');
     }
 </script>
