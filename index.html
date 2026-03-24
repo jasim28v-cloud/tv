@@ -1,99 +1,242 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل Xtream TV الذكي 📺</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Adult IPTV Player</title>
     <style>
-        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .header { padding: 15px; background: #111; border-bottom: 2px solid #ff4757; text-align: center; }
-        .main-player { flex: 2; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
-        video { width: 100%; max-height: 100%; aspect-ratio: 16/9; }
-        .playlist-area { flex: 1; background: #111; padding: 15px; overflow-y: auto; border-top: 1px solid #333; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-        .channel-item { background: #1a1a1a; border: 1px solid #333; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.3s; font-size: 14px; }
-        .channel-item:hover { background: #ff4757; border-color: #fff; transform: scale(1.05); }
-        .active { background: #ff4757 !important; font-weight: bold; }
-        .loader { color: #00ffcc; font-size: 14px; margin-bottom: 10px; text-align: center; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .player-container {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .player {
+            width: 100%;
+            height: 500px;
+            background-color: #000;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .channel-list {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .channel-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .channel-item:hover {
+            background-color: #333;
+        }
+        .channel-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        .channel-info {
+            flex: 1;
+        }
+        .channel-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .channel-category {
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #cc0000;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #aaaaaa;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <h2 style="margin:0; color:#ff4757;">Xtream Live Player 📺</h2>
-</div>
-
-<div class="main-player">
-    <video id="video" controls autoplay></video>
-</div>
-
-<div class="playlist-area">
-    <div id="loader" class="loader">جاري الاتصال بالسيرفر وجلب القنوات...</div>
-    <div class="grid" id="channelList">
+    <div class="container">
+        <div class="header">
+            <h1>Adult IPTV Player</h1>
+            <p>Watch free XXX IPTV channels</p>
         </div>
-</div>
 
-<script>
-    // بيانات السيرفر التي أرسلتها
-    const serverUrl = "https://xc.adultiptv.net";
-    const user = "adultiptv";
-    const pass = "adultiptv";
+        <div class="player-container">
+            <video id="videoPlayer" class="player" controls autoplay></video>
+            <div class="controls">
+                <button id="playBtn" class="btn">Play</button>
+                <button id="stopBtn" class="btn">Stop</button>
+                <button id="reloadBtn" class="btn">Reload Channels</button>
+            </div>
+        </div>
 
-    // تحويل البيانات إلى روابط مباشرة (M3U8) للقنوات الأكثر شهرة في هذا السيرفر
-    const channels = [
-        { id: "1", name: "Live Cams", stream: "http://live.adultiptv.net/livecams.m3u8" },
-        { id: "2", name: "MILF TV", stream: "http://live.adultiptv.net/milf.m3u8" },
-        { id: "3", name: "Big Tits", stream: "http://live.adultiptv.net/bigtits.m3u8" },
-        { id: "4", name: "Asian Sex", stream: "http://live.adultiptv.net/asian.m3u8" },
-        { id: "5", name: "Latina", stream: "http://live.adultiptv.net/latina.m3u8" },
-        { id: "6", name: "Hardcore", stream: "http://live.adultiptv.net/hardcore.m3u8" },
-        { id: "7", name: "Lesbian", stream: "http://live.adultiptv.net/lesbian.m3u8" },
-        { id: "8", name: "Pornstar", stream: "http://live.adultiptv.net/pornstar.m3u8" },
-        { id: "9", name: "Anal", stream: "http://live.adultiptv.net/anal.m3u8" },
-        { id: "10", name: "Blowjob", stream: "http://live.adultiptv.net/blowjob.m3u8" }
-    ];
+        <div class="channel-list" id="channelList">
+            <!-- Channels will be loaded here -->
+        </div>
 
-    const video = document.getElementById('video');
-    const listContainer = document.getElementById('channelList');
-    const loader = document.getElementById('loader');
-    let hls = new Hls();
+        <div class="footer">
+            <p>Channels are updated automatically every 10 minutes.</p>
+        </div>
+    </div>
 
-    // إنشاء أزرار القنوات
-    channels.forEach(ch => {
-        const item = document.createElement('div');
-        item.className = 'channel-item';
-        item.innerHTML = `<b>CH ${ch.id}</b><br>${ch.name}`;
-        item.onclick = () => playStream(ch.stream, item);
-        listContainer.appendChild(item);
-    });
+    <script>
+        // M3U Playlist URL
+        const m3uUrl = "http://adultiptv.net/chs.m3u";
+        // Xtream Codes API URL
+        const xtreamUrl = "https://xc.adultiptv.net/get.php?username=adultiptv&password=adultiptv&type=m3u";
 
-    loader.innerText = "السيرفر متصل ✅ اختر قناة للمشاهدة";
+        // Video player element
+        const videoPlayer = document.getElementById("videoPlayer");
+        // Channel list element
+        const channelList = document.getElementById("channelList");
+        // Buttons
+        const playBtn = document.getElementById("playBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const reloadBtn = document.getElementById("reloadBtn");
 
-    function playStream(url, element) {
-        // نستخدم البروكسي لتخطي حظر السيرفر للمتصفحات
-        const finalUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
-        
-        if (Hls.isSupported()) {
-            hls.destroy();
-            hls = new Hls();
-            hls.loadSource(finalUrl);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play();
-                loader.innerText = "بث مباشر الآن... 🟢";
-            });
-            
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) loader.innerText = "⚠️ فشل في الاتصال بالبث. جرب VPN.";
+        // Load channels from M3U playlist
+        async function loadChannels() {
+            try {
+                const response = await fetch(xtreamUrl);
+                const m3uContent = await response.text();
+                parseM3u(m3uContent);
+            } catch (error) {
+                console.error("Error loading M3U playlist:", error);
+                alert("Failed to load channels. Please try again later.");
+            }
+        }
+
+        // Parse M3U content and populate channel list
+        function parseM3u(m3uContent) {
+            const lines = m3uContent.split('\n');
+            const channels = [];
+            let currentChannel = null;
+
+            for (const line of lines) {
+                if (line.startsWith('#EXTINF:')) {
+                    currentChannel = {};
+                    const nameMatch = line.match(/tvg-name="([^"]+)"/);
+                    const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    const groupMatch = line.match(/group-title="([^"]+)"/);
+
+                    currentChannel.name = nameMatch ? nameMatch[1] : "Unknown Channel";
+                    currentChannel.logo = logoMatch ? logoMatch[1] : "https://files.adultiptv.net/adultiptvnet.jpg";
+                    currentChannel.group = groupMatch ? groupMatch[1] : "XXX";
+                } else if (line && !line.startsWith('#') && currentChannel) {
+                    currentChannel.url = line;
+                    channels.push(currentChannel);
+                    currentChannel = null;
+                }
+            }
+
+            displayChannels(channels);
+        }
+
+        // Display channels in the UI
+        function displayChannels(channels) {
+            channelList.innerHTML = '';
+            channels.forEach(channel => {
+                const channelItem = document.createElement('div');
+                channelItem.className = 'channel-item';
+                channelItem.innerHTML = `
+                    <img src="${channel.logo}" class="channel-logo" alt="${channel.name}">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-category">${channel.group}</div>
+                    </div>
+                `;
+                channelItem.addEventListener('click', () => playChannel(channel.url));
+                channelList.appendChild(channelItem);
             });
         }
 
-        // تحديث الاختيار
-        document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
-        element.classList.add('active');
-    }
-</script>
+        // Play selected channel
+        function playChannel(url) {
+            if (Hls.isSupported()) {
+                if (videoPlayer.src) {
+                    videoPlayer.pause();
+                    videoPlayer.src = '';
+                }
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    videoPlayer.play();
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                videoPlayer.src = url;
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.play();
+                });
+            } else {
+                alert("Your browser does not support HLS streaming.");
+            }
+        }
 
+        // Event listeners for buttons
+        playBtn.addEventListener('click', () => {
+            if (videoPlayer.src) {
+                videoPlayer.play();
+            } else {
+                alert("Please select a channel first.");
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            videoPlayer.pause();
+            videoPlayer.src = '';
+        });
+
+        reloadBtn.addEventListener('click', loadChannels);
+
+        // Load HLS.js for streaming support
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        script.onload = () => {
+            loadChannels();
+        };
+        document.head.appendChild(script);
+    </script>
 </body>
 </html>
