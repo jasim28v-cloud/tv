@@ -3,92 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل القنوات الاحترافي</title>
-    
-    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-    
+    <title>تلفزيون الأصدقاء الذكي 📺</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background-color: #0f0f0f; color: #efefef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .player-box { width: 100%; max-width: 900px; margin-bottom: 20px; }
-        .search-container { width: 100%; max-width: 900px; margin-bottom: 15px; }
-        #searchBar { width: 100%; padding: 12px; border-radius: 25px; border: none; background: #222; color: white; outline: none; font-size: 16px; box-sizing: border-box; }
-        .playlist-container { width: 100%; max-width: 900px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; height: 300px; overflow-y: auto; padding: 10px; background: #1a1a1a; border-radius: 10px; }
-        .chan-btn { background: #2d2d2d; color: #ccc; border: 1px solid #444; padding: 10px; cursor: pointer; border-radius: 8px; font-size: 13px; transition: 0.3s; text-align: center; }
-        .chan-btn:hover { background: #ff4757; color: white; border-color: #ff4757; }
-        .active-chan { background: #ff4757 !important; color: white !important; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* مشغل الفيديو */
+        .tv-screen { flex: 2; background: #000; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid #222; }
+        video { width: 100%; max-height: 100%; aspect-ratio: 16/9; }
+
+        /* قائمة القنوات السفلى */
+        .tv-channels { flex: 1; background: #111; padding: 15px; overflow-y: auto; }
+        
+        .search-bar { width: 95%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: none; background: #222; color: #00ffcc; font-size: 16px; }
+
+        .channels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+
+        .channel-card { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; transition: 0.2s; }
+        .channel-card:hover { background: #ff4757; transform: scale(1.03); }
+        .channel-card.active { border-color: #ff4757; background: #800000; }
+
+        .ch-number { background: #333; color: #ff4757; padding: 5px 10px; border-radius: 4px; margin-left: 10px; font-weight: bold; min-width: 25px; text-align: center; }
+        .ch-name { font-size: 14px; font-weight: 500; }
+
+        /* تخصيص السكرول بار */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: #ff4757;">بث مباشر 📺</h2>
-
-    <div class="player-box">
-        <video id="my-video" class="video-js vjs-default-skin vjs-16-9 vjs-big-play-centered" controls preload="auto">
-            <source id="video-source" src="http://live.adultiptv.net/livecams.m3u8" type="application/x-mpegURL">
-        </video>
+    <div class="tv-screen">
+        <video id="videoPlayer" controls autoplay></video>
     </div>
 
-    <div class="search-container">
-        <input type="text" id="searchBar" onkeyup="filterChannels()" placeholder="🔍 ابحث عن اسم القناة هنا...">
+    <div class="tv-channels">
+        <input type="text" id="searchInput" class="search-bar" onkeyup="search()" placeholder="🔍 ابحث عن اسم أو رقم القناة...">
+        
+        <div class="channels-grid" id="grid">
+            </div>
     </div>
 
-    <div class="playlist-container" id="playlist">
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/livecams.m3u8')">Live Cams</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/milf.m3u8')">MILF</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/bigdick.m3u8')">Big Dick</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/bigtits.m3u8')">Big Tits</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/fetish.m3u8')">Fetish</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/pornstar.m3u8')">Pornstar</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/bigass.m3u8')">Big Ass</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/interracial.m3u8')">Interracial</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/latina.m3u8')">Latina</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/pov.m3u8')">POV</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/blowjob.m3u8')">Blowjob</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/hardcore.m3u8')">Hardcore</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/cuckold.m3u8')">Cuckold</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/threesome.m3u8')">Threesome</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/russian.m3u8')">Russian</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/lesbian.m3u8')">Lesbian</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/rough.m3u8')">Rough</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/gangbang.m3u8')">Gangbang</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/anal.m3u8')">Anal</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/compilation.m3u8')">Compilation</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/brunette.m3u8')">Brunette</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/blonde.m3u8')">Blonde</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/gay.m3u8')">Gay</button>
-        <button class="chan-btn" onclick="changeChannel(this, 'http://live.adultiptv.net/asian.m3u8')">Asian</button>
-    </div>
-
-    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
     <script>
-        var player = videojs('my-video');
+        const proxy = "https://corsproxy.io/?"; // بروكسي لتخطي الحظر
+        
+        const rawChannels = [
+            { n: "Live Cams", u: "http://live.adultiptv.net/livecams.m3u8" },
+            { n: "MILF", u: "http://live.adultiptv.net/milf.m3u8" },
+            { n: "Big Dick", u: "http://live.adultiptv.net/bigdick.m3u8" },
+            { n: "Big Tits", u: "http://live.adultiptv.net/bigtits.m3u8" },
+            { n: "Fetish", u: "http://live.adultiptv.net/fetish.m3u8" },
+            { n: "Pornstar", u: "http://live.adultiptv.net/pornstar.m3u8" },
+            { n: "Big Ass", u: "http://live.adultiptv.net/bigass.m3u8" },
+            { n: "Interracial", u: "http://live.adultiptv.net/interracial.m3u8" },
+            { n: "Latina", u: "http://live.adultiptv.net/latina.m3u8" },
+            { n: "POV", u: "http://live.adultiptv.net/pov.m3u8" },
+            { n: "Blowjob", u: "http://live.adultiptv.net/blowjob.m3u8" },
+            { n: "Hardcore", u: "http://live.adultiptv.net/hardcore.m3u8" },
+            { n: "Cuckold", u: "http://live.adultiptv.net/cuckold.m3u8" },
+            { n: "Threesome", u: "http://live.adultiptv.net/threesome.m3u8" },
+            { n: "Russian", u: "http://live.adultiptv.net/russian.m3u8" },
+            { n: "Lesbian", u: "http://live.adultiptv.net/lesbian.m3u8" },
+            { n: "Rough", u: "http://live.adultiptv.net/rough.m3u8" },
+            { n: "Gangbang", u: "http://live.adultiptv.net/gangbang.m3u8" },
+            { n: "Anal", u: "http://live.adultiptv.net/anal.m3u8" },
+            { n: "Compilation", u: "http://live.adultiptv.net/compilation.m3u8" },
+            { n: "Brunette", u: "http://live.adultiptv.net/brunette.m3u8" },
+            { n: "Blonde", u: "http://live.adultiptv.net/blonde.m3u8" },
+            { n: "Gay", u: "http://live.adultiptv.net/gay.m3u8" },
+            { n: "Asian", u: "http://live.adultiptv.net/asian.m3u8" }
+        ];
 
-        function changeChannel(btn, url) {
-            // تغيير الرابط
-            player.src({ src: url, type: 'application/x-mpegURL' });
-            player.play();
+        const grid = document.getElementById('grid');
+        const video = document.getElementById('videoPlayer');
+        let hls = new Hls();
 
-            // تحديث شكل الأزرار
-            var btns = document.getElementsByClassName("chan-btn");
-            for (var i = 0; i < btns.length; i++) {
-                btns[i].classList.remove("active-chan");
+        // إنشاء قائمة القنوات مع الأرقام
+        rawChannels.forEach((ch, index) => {
+            const card = document.createElement('div');
+            card.className = 'channel-card';
+            card.onclick = () => play(card, ch.u);
+            card.innerHTML = `
+                <div class="ch-number">${index + 1}</div>
+                <div class="ch-name">${ch.n}</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        function play(element, url) {
+            const finalUrl = proxy + encodeURIComponent(url);
+            
+            if (Hls.isSupported()) {
+                hls.destroy();
+                hls = new Hls();
+                hls.loadSource(finalUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
             }
-            btn.classList.add("active-chan");
+
+            // تحديث الشكل النشط
+            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
         }
 
-        function filterChannels() {
-            var input = document.getElementById('searchBar');
-            var filter = input.value.toLowerCase();
-            var nodes = document.getElementsByClassName('chan-btn');
-
-            for (i = 0; i < nodes.length; i++) {
-                if (nodes[i].innerText.toLowerCase().includes(filter)) {
-                    nodes[i].style.display = "block";
-                } else {
-                    nodes[i].style.display = "none";
-                }
+        function search() {
+            let filter = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.getElementsByClassName('channel-card');
+            for (let card of cards) {
+                let text = card.innerText.toLowerCase();
+                card.style.display = text.includes(filter) ? "flex" : "none";
             }
         }
     </script>
