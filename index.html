@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adult IPTV Player - مشغل قنوات البالغين</title>
+    <title>Adult IPTV Player - مشغل مباشر للقنوات</title>
     <style>
         :root {
-            --primary-color: #1e1e1e;
-            --secondary-color: #2d2d2d;
-            --text-color: #ffffff;
-            --accent-color: #ff0000;
-            --hover-color: #3a3a3a;
+            --primary-color: #121212;
+            --secondary-color: #1e1e1e;
+            --accent-color: #ff1a1a;
+            --text-color: #e0e0e0;
+            --hover-color: #333333;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Tahoma', 'Arial', sans-serif;
             background-color: var(--primary-color);
             color: var(--text-color);
             margin: 0;
@@ -27,34 +27,57 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             border-bottom: 1px solid #444;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
         }
         .header h1 {
             color: var(--accent-color);
-            font-size: 28px;
+            margin: 0;
+            font-size: 26px;
+        }
+        .header p {
+            color: #aaa;
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+        .instructions {
+            background-color: var(--secondary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .instructions h3 {
+            color: var(--accent-color);
+            margin-top: 0;
         }
         .player-container {
             background-color: var(--secondary-color);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: center;
         }
-        .player {
-            width: 100%;
-            height: 500px;
+        .player-placeholder {
             background-color: #000;
-            border-radius: 5px;
+            height: 400px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 18px;
             margin-bottom: 15px;
         }
         .controls {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 15px;
             flex-wrap: wrap;
+            margin-bottom: 15px;
         }
         .btn {
             background-color: var(--accent-color);
@@ -67,57 +90,48 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #cc0000;
+            background-color: #e60000;
         }
-        .channel-list-container {
-            background-color: var(--secondary-color);
-            border-radius: 8px;
-            padding: 15px;
+        .btn:disabled {
+            background-color: #444;
+            cursor: not-allowed;
+        }
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
         }
-        .channel-list-title {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 18px;
-            color: var(--accent-color);
-        }
-        .channel-list {
-            height: 400px;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
-        .channel-item {
-            background-color: var(--primary-color);
-            border-radius: 5px;
+        .channel-card {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
             padding: 10px;
+            text-align: center;
             cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            transition: transform 0.2s, background-color 0.2s;
         }
-        .channel-item:hover {
+        .channel-card:hover {
             background-color: var(--hover-color);
+            transform: translateY(-3px);
         }
         .channel-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 4px;
+            width: 100%;
+            height: 120px;
             object-fit: cover;
-        }
-        .channel-info {
-            flex: 1;
+            border-radius: 5px;
+            margin-bottom: 8px;
         }
         .channel-name {
-            font-weight: bold;
             font-size: 14px;
+            font-weight: bold;
             margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .channel-category {
-            color: #aaaaaa;
             font-size: 12px;
+            color: #aaa;
         }
         .search-container {
             margin-bottom: 20px;
@@ -131,6 +145,7 @@
             border: 1px solid #444;
             background-color: var(--primary-color);
             color: var(--text-color);
+            font-size: 14px;
         }
         .search-btn {
             padding: 10px 20px;
@@ -139,19 +154,15 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
         }
         .footer {
             text-align: center;
-            color: #aaaaaa;
+            color: #888;
             font-size: 12px;
-            margin-top: 20px;
-            padding-top: 10px;
+            margin-top: 30px;
+            padding-top: 15px;
             border-top: 1px solid #444;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: var(--accent-color);
         }
         .error-message {
             color: var(--accent-color);
@@ -159,14 +170,20 @@
             padding: 10px;
             background-color: #333;
             border-radius: 5px;
-            margin: 10px 0;
+            margin: 15px 0;
+            display: none;
         }
         @media (max-width: 768px) {
-            .channel-list {
-                grid-template-columns: 1fr;
+            .channel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
-            .player {
-                height: 300px;
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 8px;
             }
         }
     </style>
@@ -174,8 +191,15 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Adult IPTV Player - مشغل قنوات البالغين</h1>
+            <h1>Adult IPTV Player</h1>
             <p>مشاهدة القنوات الإباحية مباشرة بدون تحميل</p>
+        </div>
+
+        <div class="instructions">
+            <h3>تعليمات الاستخدام:</h3>
+            <p>1. اختر قناة من القائمة أدناه.</p>
+            <p>2. انقر على زر "فتح في VLC" لتشغيل القناة في برنامج VLC.</p>
+            <p>3. إذا لم تعمل القناة، حاول استخدام VPN أو تغيير الخادم.</p>
         </div>
 
         <div class="search-container">
@@ -183,188 +207,160 @@
             <button id="searchBtn" class="search-btn">بحث</button>
         </div>
 
-        <div class="player-container">
-            <video id="videoPlayer" class="player" controls></video>
-            <div class="controls">
-                <button id="playBtn" class="btn">تشغيل</button>
-                <button id="stopBtn" class="btn">إيقاف</button>
-                <button id="reloadBtn" class="btn">تحديث القنوات</button>
-                <button id="vlcBtn" class="btn">فتح في VLC</button>
-            </div>
-            <div id="errorContainer" class="error-message" style="display: none;"></div>
+        <div class="error-message" id="errorMessage">
+            حدث خطأ أثناء محاولة فتح القناة. حاول استخدام زر "فتح في VLC".
         </div>
 
-        <div class="channel-list-container">
-            <div class="channel-list-title">قائمة القنوات المتاحة</div>
-            <div class="loading" id="loadingMessage">جاري تحميل القنوات...</div>
-            <div class="channel-list" id="channelList">
-                <!-- القنوات ستظهر هنا -->
+        <div class="player-container">
+            <div class="player-placeholder">
+                اختر قناة من القائمة لفتحها في VLC
+            </div>
+            <div class="controls">
+                <button id="openVLCBtn" class="btn" disabled>فتح في VLC</button>
+                <button id="copyURLBtn" class="btn" disabled>نسخ رابط القناة</button>
+            </div>
+        </div>
+
+        <div class="channel-grid" id="channelList">
+            <!-- القنوات ستظهر هنا -->
+            <div class="channel-card" data-url="http://live.adultiptv.net/livecams.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Live Cams">
+                <div class="channel-name">Live Cams</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/milf.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="MILF">
+                <div class="channel-name">MILF</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/bigdick.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Big Dick">
+                <div class="channel-name">Big Dick</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/bigtits.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Big Tits">
+                <div class="channel-name">Big Tits</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/fetish.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Fetish">
+                <div class="channel-name">Fetish</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/pornstar.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Pornstar">
+                <div class="channel-name">Pornstar</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/bigass.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Big Ass">
+                <div class="channel-name">Big Ass</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/interracial.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Interracial">
+                <div class="channel-name">Interracial</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/latina.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Latina">
+                <div class="channel-name">Latina</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/pov.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="POV">
+                <div class="channel-name">POV</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/blowjob.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Blowjob">
+                <div class="channel-name">Blowjob</div>
+                <div class="channel-category">XXX</div>
+            </div>
+            <div class="channel-card" data-url="http://live.adultiptv.net/hardcore.m3u8">
+                <img src="https://files.adultiptv.net/adultiptvnet.jpg" class="channel-logo" alt="Hardcore">
+                <div class="channel-name">Hardcore</div>
+                <div class="channel-category">XXX</div>
             </div>
         </div>
 
         <div class="footer">
-            <p>جميع الحقوق محفوظة | القنوات تُحدث تلقائيًا كل 10 دقائق</p>
-            <p>إذا لم تعمل القنوات، حاول استخدام <strong>VPN</strong> أو فتحها في <strong>VLC</strong></p>
+            <p>جميع الحقوق محفوظة | إذا لم تعمل القنوات، حاول استخدام VPN أو فتحها في VLC</p>
+            <p>الروابط مأخوذة من <a href="http://adultiptv.net" style="color: var(--accent-color);">AdultIPTV.net</a></p>
         </div>
     </div>
 
-    <!-- HLS.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
     <script>
-        // قائمة القنوات الافتراضية (يمكن استبدالها بتحميل مباشر من M3U)
-        const defaultChannels = [
-            { name: "AdultIPTV.net Live Cams", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/livecams.m3u8" },
-            { name: "AdultIPTV.net MILF", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/milf.m3u8" },
-            { name: "AdultIPTV.net Big Dick", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/bigdick.m3u8" },
-            { name: "AdultIPTV.net Big Tits", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/bigtits.m3u8" },
-            { name: "AdultIPTV.net Fetish", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/fetish.m3u8" },
-            { name: "AdultIPTV.net Pornstar", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/pornstar.m3u8" },
-            { name: "AdultIPTV.net Big Ass", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/bigass.m3u8" },
-            { name: "AdultIPTV.net Interracial", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/interracial.m3u8" },
-            { name: "AdultIPTV.net Latina", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/latina.m3u8" },
-            { name: "AdultIPTV.net POV", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/pov.m3u8" },
-            { name: "AdultIPTV.net Blowjob", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/blowjob.m3u8" },
-            { name: "AdultIPTV.net Hardcore", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/hardcore.m3u8" },
-            { name: "AdultIPTV.net Cuckold", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/cuckold.m3u8" },
-            { name: "AdultIPTV.net Threesome", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/threesome.m3u8" },
-            { name: "AdultIPTV.net Russian", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/russian.m3u8" },
-            { name: "AdultIPTV.net Lesbian", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/lesbian.m3u8" },
-            { name: "AdultIPTV.net Rough", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/rough.m3u8" },
-            { name: "AdultIPTV.net Gangbang", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/gangbang.m3u8" },
-            { name: "AdultIPTV.net Anal", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/anal.m3u8" },
-            { name: "AdultIPTV.net Compilation", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/compilation.m3u8" },
-            { name: "AdultIPTV.net Brunette", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/brunette.m3u8" },
-            { name: "AdultIPTV.net Blonde", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/blonde.m3u8" },
-            { name: "AdultIPTV.net Gay", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/gay.m3u8" },
-            { name: "AdultIPTV.net Asian", logo: "https://files.adultiptv.net/adultiptvnet.jpg", group: "XXX", url: "http://live.adultiptv.net/asian.m3u8" }
-        ];
-
         // عناصر الصفحة
-        const videoPlayer = document.getElementById("videoPlayer");
-        const channelList = document.getElementById("channelList");
-        const loadingMessage = document.getElementById("loadingMessage");
-        const errorContainer = document.getElementById("errorContainer");
-        const playBtn = document.getElementById("playBtn");
-        const stopBtn = document.getElementById("stopBtn");
-        const reloadBtn = document.getElementById("reloadBtn");
-        const vlcBtn = document.getElementById("vlcBtn");
-        const searchInput = document.getElementById("searchInput");
-        const searchBtn = document.getElementById("searchBtn");
+        const channelCards = document.querySelectorAll('.channel-card');
+        const openVLCBtn = document.getElementById('openVLCBtn');
+        const copyURLBtn = document.getElementById('copyURLBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const errorMessage = document.getElementById('errorMessage');
 
-        // تحميل القنوات الافتراضية
-        function loadDefaultChannels() {
-            displayChannels(defaultChannels);
-            loadingMessage.style.display = "none";
-        }
+        // متغير لحفظ رابط القناة المختارة
+        let selectedChannelURL = '';
 
-        // عرض القنوات في الواجهة
-        function displayChannels(channels) {
-            channelList.innerHTML = "";
-            channels.forEach(channel => {
-                const channelItem = document.createElement("div");
-                channelItem.className = "channel-item";
-                channelItem.innerHTML = `
-                    <img src="${channel.logo}" class="channel-logo" alt="${channel.name}">
-                    <div class="channel-info">
-                        <div class="channel-name">${channel.name}</div>
-                        <div class="channel-category">${channel.group}</div>
-                    </div>
-                `;
-                channelItem.addEventListener("click", () => playChannel(channel.url));
-                channelList.appendChild(channelItem);
+        // إضافة حدث النقر لكل قناة
+        channelCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // إزالة التحديد من جميع البطاقات
+                channelCards.forEach(c => c.style.border = 'none');
+                // تحديد البطاقة المختارة
+                card.style.border = '2px solid var(--accent-color)';
+                // حفظ رابط القناة
+                selectedChannelURL = card.getAttribute('data-url');
+                // تمكين الأزرار
+                openVLCBtn.disabled = false;
+                copyURLBtn.disabled = false;
             });
-        }
-
-        // تشغيل القناة
-        function playChannel(url) {
-            errorContainer.style.display = "none";
-            if (Hls.isSupported()) {
-                if (videoPlayer.src) {
-                    videoPlayer.pause();
-                    videoPlayer.src = "";
-                }
-                const hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(videoPlayer);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    videoPlayer.play();
-                });
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) {
-                        showError("فشل في تشغيل القناة. حاول استخدام VPN أو فتحها في VLC.");
-                        hls.destroy();
-                    }
-                });
-            } else if (videoPlayer.canPlayType("application/vnd.apple.mpegurl")) {
-                videoPlayer.src = url;
-                videoPlayer.addEventListener("loadedmetadata", () => {
-                    videoPlayer.play();
-                });
-            } else {
-                showError("المتصفح لا يدعم تشغيل HLS. حاول استخدام Chrome أو Firefox أو فتح القناة في VLC.");
-            }
-        }
-
-        // عرض رسالة خطأ
-        function showError(message) {
-            errorContainer.textContent = message;
-            errorContainer.style.display = "block";
-        }
+        });
 
         // فتح القناة في VLC
-        function openInVLC(url) {
-            const vlcUrl = `vlc://${url}`;
-            window.open(vlcUrl, "_blank");
-        }
+        openVLCBtn.addEventListener('click', () => {
+            if (selectedChannelURL) {
+                // إنشاء رابط VLC
+                const vlcProtocolURL = `vlc://${selectedChannelURL}`;
+                // محاولة فتحه في نافذة جديدة
+                window.open(vlcProtocolURL, '_blank');
+            }
+        });
+
+        // نسخ رابط القناة
+        copyURLBtn.addEventListener('click', () => {
+            if (selectedChannelURL) {
+                navigator.clipboard.writeText(selectedChannelURL)
+                    .then(() => {
+                        alert('تم نسخ رابط القناة: ' + selectedChannelURL);
+                    })
+                    .catch(err => {
+                        console.error('فشل في نسخ الرابط: ', err);
+                        alert('فشل في نسخ الرابط. حاول مرة أخرى.');
+                    });
+            }
+        });
 
         // بحث عن قناة
-        function searchChannels() {
+        searchBtn.addEventListener('click', () => {
             const searchTerm = searchInput.value.toLowerCase();
-            if (!searchTerm) {
-                displayChannels(defaultChannels);
-                return;
-            }
-            const filteredChannels = defaultChannels.filter(channel =>
-                channel.name.toLowerCase().includes(searchTerm) ||
-                channel.group.toLowerCase().includes(searchTerm)
-            );
-            displayChannels(filteredChannels);
-        }
-
-        // أحداث الأزرار
-        playBtn.addEventListener("click", () => {
-            if (videoPlayer.src) {
-                videoPlayer.play();
-            } else {
-                showError("يرجى اختيار قناة أولاً.");
-            }
+            channelCards.forEach(card => {
+                const channelName = card.querySelector('.channel-name').textContent.toLowerCase();
+                if (channelName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = searchTerm ? 'none' : 'block';
+                }
+            });
         });
 
-        stopBtn.addEventListener("click", () => {
-            videoPlayer.pause();
-            videoPlayer.src = "";
-        });
-
-        reloadBtn.addEventListener("click", loadDefaultChannels);
-
-        vlcBtn.addEventListener("click", () => {
-            if (videoPlayer.src) {
-                openInVLC(videoPlayer.src);
-            } else {
-                showError("يرجى اختيار قناة أولاً.");
+        // بحث عند الضغط على Enter
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                searchBtn.click();
             }
         });
-
-        searchBtn.addEventListener("click", searchChannels);
-        searchInput.addEventListener("keyup", (e) => {
-            if (e.key === "Enter") {
-                searchChannels();
-            }
-        });
-
-        // تحميل القنوات عند بدء الصفحة
-        window.addEventListener("load", loadDefaultChannels);
     </script>
 </body>
 </html>
